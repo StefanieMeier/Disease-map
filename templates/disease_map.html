@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Disease mapping</title>
+
+    <script src="static/libraries/d3.v4.min.js" charset="utf-8"></script>
+    <script src="static/libraries/topojson.v1.min.js"></script>
+    <script src="static/libraries/d3-queue.v2.min.js"></script>
+    <script src="static/libraries/textures.js" charset="utf-8"></script>
+    <script src="static/libraries/simpleheat.js"></script> 
+    <script src="static/libraries/d3-hsv.v0.1.min.js"></script>
+    <script src="static/libraries/d3-contour.v1.min.js"></script>
+ 	<script src="static/libraries/Chart.min.js"></script>
+ 	<script src="static/libraries/Chart.bundle.min.js"></script>
+
+	<link rel = "stylesheet" type ="text/css" href="static/css/style_diseasemap.css" />
+
+</head>
+
+<body>
+
+    <div id='container'></div>
+
+    <div id="title">Incidence rate of vector-borne diseases in changing climates</div>
+
+    <div id="loadingContainer" class="blinking" style="z-index: 1">Loading data...</div>
+
+    <div id="legendContainer">
+
+	    <div class="styled-select semi-square">
+	    	<!-- The <select> element is used to create a drop-down list. -->
+	    	<select id="dropDown">
+		        <!-- The <option> tags inside the <select> element define the available options in the list. -->
+		        <option value="Dengue">Dengue</option>
+		        <option value="Malaria">Malaria</option>
+		        <option value="Tick_enc">Tick borne encephalitis</option>
+	    	</select>
+	    </div>
+
+	    <div id="sliderContainer">
+	        <input id="timeslide" type="range" min="0" max="9" value="0" step="1" class="slider"/><br>
+	        <!-- The <span> tag provides a way to add a hook to a part of a text or a part of a document. -->
+	        <span id="range">2008</span>
+	    </div>
+
+	    <div id="tempContainer">
+	    	<div id="tempTitle">Average temperature January</div>
+		    <div id="tempGradient"></div>
+		    <div id="tempText">-22.8 14.5</div>
+		</div>
+
+	    <div id="incidenceTitle">Incidence rate (N/100000)
+	    	</div>
+
+
+		<div id="incidenceContainer1">
+	    	<div id="incidencePattern1"></div>
+			<div id="incidenceText1">0</div>
+		</div>
+	 	<div id="incidenceContainer2">
+	    	<div id="incidencePattern2"></div>
+			<div id="incidenceText2">No data</div>
+		</div>
+		<div id="incidenceContainer3">
+	    	<div id="incidencePattern3"></div>
+			<div id="incidenceText3">No data</div>
+		</div>    	
+		<div id="incidenceContainer4">
+	    	<div id="incidencePattern4"></div>
+			<div id="incidenceText4">No data</div>
+		</div>
+		<div id="incidenceContainer5">
+	    	<div id="incidencePattern5"></div>
+			<div id="incidenceText5">No data</div>
+		</div>
+
+	</div>
+    <div id="selectContainer" style="z-index: 1">Click on a country to plot the details</div>
+	<div id="plotContainer" style="position: relative; height:400px; width:600px">
+	    <canvas id="myChart" width="500px" height="400px"></canvas>
+	</div>
+	
+
+    <div id="text">Background<br>
+		<p>Changing climates can influence the geographic distribution of insects that transmit diseases such as dengue (main vector: <i>Aedes</i> mosquitos), malaria (<i>Anopheles</i> mosquitos), or tick-borne encephalitis (TBE, <i>Ixodes</i> ticks). While ticks that  transmit TBE are endemic in Eastern Europe, mosquitos of the genera <i>Aedes</i> (especially the vectors of the dengue virus <i>Aedes aegypti</i> and <i>Aedes albopictus</i>) and <i>Anopheles</i> have been observed occationally in some areas in Southern Europe where they are known as invasive species[1].  Whether the disease vectors can spread to new areas depends on multiple factors, including temperature, rainfall, and humidity. Studies showed for example that milder conditions enable ticks and mosquitos to overwinter [2, 3, 4]. For this reason, I focused on the distribution of the abovementioned diseases in Europe in connection with the average January temperature between 2008 and 2017, so as to see whether a trend is observable.</p><br>
+		Approach
+		<p>The disease data has been downloaded from the <a href="https://atlas.ecdc.europa.eu/public/index.aspx">European Centre for Disease Prevention and Control (ecdc)</a>. Not for all countries data was available at all times. 
+		The temperature data has been downloaded from the  <a href="https://cds.climate.copernicus.eu/cdsapp#!/home">Climate Data Store</a>. The temperatures represent the average January temperature 2 m above ground. The simpleheat.js library was used to map the temperatures. For some areas (e.g. in Turkey or waters) no data was available. These areas appear black on the map. The textrures.js library was used to create the patterns.</p>
+		<br>
+		Results and conclusions
+		<p>No clear trend between rising temperatures and rising disease incidence rates is observable. There are multiple possible explanations for this finding. 
+		<ul>
+		<li>It should be considered that the reported notification rates strongly depend on the quality of the public health surveillance. Not all disease incidences might be reported in every country at all times. This can make it difficult to compare incidence rates between countries and over time.</li> 	
+		<li>It is important to notice that the majority of malaria and dengue cases in Europe are currently imported by international travelers and immigrants. Local transmission has only been observed occasionally in certain countries in southern Europe. Thus, it is not surprising that temperature and incidence rate do not seem to correlate.</li> 	
+		<li>The map only shows the data of one decade (all that was available from the European Centre for Disease Prevention). It is possible that a trend could be detected when comparing data over a longer time frame.</li>
+        <li>Multiple other factors apart from temperature, such as humidity or the availability of breeding sites, influence how well insects can spread. For simplicity reasons, they were not (yet) included in this model.</li>  
+		</ul>	
+		It will be of interest to analyze more data in the future. According to current projections the temperatures in Europe will continue to rise and certain mosquitos such as Aedes or Anopheles will become endemic and ticks more abundant. It is likely that there will be an increase in cases of diseases transmitted by these insects locally.</p>
+		<p style="font-size:80%;">
+        [1] <a href="https://atlas.ecdc.europa.eu/public/index.aspx">European Centre for Disease Prevention and Control (ecdc)</a><br>
+		[2]<a href="https://doi.org/10.1098/rsif.2012.0138">Caminade C., et al. 2012 Suitability of European climate for the Asian tiger mosquito Aedes albopictus: recent trends and future scenarios <i>J R Soc Interface</i></a><br>
+		[3] <a href="https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(00)05250-8/fulltext">Lindgren E., Gustafson R., 2001 Tick-borne encephalitis in Sweden and climate change <i>The Lancet</i></a><br>
+		[4] <a href="https://www.sciencedirect.com/science/article/pii/S1198743X16301203">Piperaki E., Daikos L., 2016 Malaria in Europe: emerging threat or minor nuisance? <i>Clin Microbiol Infect</i></a></p>
+	</div>
+
+	<script>
+		// js D3 code
+        var width = 700, height = 700; center = [12, 72];
+
+        var inputValue = "2008";
+        var syear = ["2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017"];
+
+        var disease_data_loaded = null;
+        var temp_data_loaded = null
+        var avg_temp_data_loaded = null
+        var countries_data_loaded = null;
+        var temp_max = null;
+        var temp_min = null;
+
+        countries_names = ["Aland","Albania","Andorra","Armenia","Austria","Azerbaijan","Belarus","Belgium","Bosnia and Herz.","Bulgaria","Croatia","Cyprus","Czech Rep.","Denmark","Estonia","Faeroe Is.","Finland","France","Georgia","Germany","Greece","Greenland","Guernsey","Hungary","Iceland","Ireland","Isle of Man","Italy","Jersey","Kazakhstan","Kosovo","Latvia","Liechtenstein","Lithuania","Luxembourg","Macedonia","Moldova","Monaco","Montenegro","N. Cyprus","Netherlands","Norway","Poland","Portugal","Romania","Russia","San Marino","Serbia","Slovakia","Slovenia","Spain","Sweden","Switzerland","Turkey","Turkmenistan","Ukraine","United Kingdom","Vatican"]
+
+        //Mercator projection
+        var projection = d3.geoMercator().scale(600).translate([width / 2, 0]).center(center);
+
+        var path = d3.geoPath()
+            .projection(projection);
+
+        var div = d3.select('#container');
+        
+        var canvasLayer = div.append('canvas').attr('id', 'heatmap').attr('width', width).attr('height', height);
+        // The getContext() method returns an object that provides methods and properties for drawing on the canvas. Node: Base class for all scene objects.
+        var canvas = canvasLayer.node(),
+            context = canvas.getContext("2d");
+
+        var svg = div.append('svg').attr('id', 'map').attr('width', width).attr('height', height);
+
+        // Queue up datasets using d3 Queue
+        // function getTempData() {
+        //     return 'http://localhost:5000/gettempdata';
+        // }
+        // function getAvgTempData() {
+        //     return 'http://localhost:5000/getavgtempdata';
+        // }
+        // function getDiseaseData() {
+        //     return 'http://localhost:5000/getdiseasedata';
+        // }
+        //Changes map if time slide is used; "this" will refer to the parent object in the body of the function; + use numerical value (if string)
+        d3.select("#timeslide").on("input", function () {
+            update(+this.value);
+        });
+
+        d3.select("#dropDown").on("change", function(){
+            update_disease(d3.select("#dropDown").node().value);
+        });
+
+        var tooltip = d3.select("#container")
+     		.append("div")
+    	 	.attr("class", "tooltip hidden");
+
+    	 var offsetL = document.getElementById('container').offsetLeft+50;
+    	 var offsetT = document.getElementById('container').offsetTop+50;
+
+        // getElementById() returns an Element object representing the element whose id property matches the specified string
+        // Update map according to year selected
+        function update(value) {
+            document.getElementById("range").innerHTML = syear[value];
+            inputValue = syear[value];
+            plot_heat(canvas, temp_data_loaded, projection, +syear[value]);
+            plot_disease(countries_data_loaded,disease_data_loaded,svg,d3.select("#dropDown").node().value,syear[value]);
+        }
+
+        // Update map according to disease selected
+        function update_disease(disease_value) {
+            plot_heat(canvas, temp_data_loaded, projection, +inputValue);
+            plot_disease(countries_data_loaded, disease_data_loaded, svg, disease_value, +inputValue);
+        }
+
+        // Ready Function, runs when data is loaded
+        d3.queue()
+            .defer(d3.json, "static/data/eu.topojson") // Load EU Countries
+            .defer(d3.json, "/getdiseasedata") // Load disease data
+            .defer(d3.json, "/gettempdata") // Load temperature data
+            .defer(d3.json, "/getavgtempdata") // Load average temperature data
+            .await(ready); // Run 'ready' when all JSONs are loaded
+
+
+
+        //plot heat map
+        var plot_heat = function (can,t_meas,proj,year) {
+            var heat = simpleheat(can);
+            var scale_val = function (val) {
+                if (val != 0) {
+                    return (val - temp_min) / (temp_max - temp_min)
+                } 
+                else {
+                    return null
+                }
+            }
+            // arrow function (=>) expression is an alternative to a regular function expression
+            // The map() method creates a new array with the results of calling a provided function on every element in the calling array.
+            // The data() method attaches data to, or gets data from, selected elements.
+            // convert from lon/lat to x/y in canvas; temperature in input year -> heat map
+            heat.data(t_meas.map(d => { return [proj([d.lon, d.lat])[0], proj([d.lon, d.lat])[1], scale_val(+d[year])] }));
+            // set point radius and blur radius (25 and 15 by default)
+            heat.radius(5, 15);
+            // set maximum for domain
+            heat.max(1.0);
+            heat.resize();
+            // draw into canvas, with minimum opacity threshold
+            heat.draw(0.10);
+        }
+
+        var plot_heat_legend = function (can,t_meas,proj,year) {
+            var heat = simpleheat(can);
+            var scale_val = function (val) {
+                if (val != 0) {
+                    return (val - temp_min) / (temp_max - temp_min)
+                }
+                else {
+                    return null
+                }
+            }
+            // arrow function (=>) expression is an alternative to a regular function expression
+            // The map() method creates a new array with the results of calling a provided function on every element in the calling array.
+            // The data() method attaches data to, or gets data from, selected elements.
+            // convert from lon/lat to x/y in canvas; temperature in input year -> heat map
+            heat.data([[0,0,0],[250,0,1.0]]);
+            // set point radius and blur radius (25 and 15 by default)
+            heat.radius(5, 15);
+            // set maximum for domain
+            heat.max(1.0);
+            heat.resize();
+            // draw into canvas, with minimum opacity threshold
+            heat.draw(0.10);
+        }
+
+
+		//pattern (texture) of the legends of the incidence rate
+        var svg1 = d3.select("#incidencePattern1")
+          .append("svg");
+
+
+        var svg2 = d3.select("#incidencePattern2")
+          .append("svg");
+        var t2 = textures.circles()
+                        .size(27)
+                        .radius(0.25)                    
+                        .strokeWidth(2)
+                        .stroke("red")
+                        .complement();
+        svg2.call(t2);
+        svg2.append("rect")
+        	.attr("width", 36)
+        	.attr("height", 36)
+        	.style("fill", t2.url());
+
+
+        var svg3 = d3.select("#incidencePattern3")
+          .append("svg");
+        var t3 = textures.circles()
+                        .size(13)
+                        .radius(0.25)                    
+                        .strokeWidth(2)
+                        .stroke("red")
+                        .complement();
+        svg3.call(t3);
+        svg3.append("rect")
+        	.attr("width", 36)
+        	.attr("height", 36)
+        	.style("fill", t3.url());
+
+
+        var svg4 = d3.select("#incidencePattern4")
+          .append("svg");
+        var t4 = textures.circles()
+                        .size(8)
+                        .radius(0.25)                    
+                        .strokeWidth(2)
+                        .stroke("red")
+                        .complement();
+        svg4.call(t4);
+        svg4.append("rect")
+        	.attr("width", 36)
+        	.attr("height", 36)
+        	.style("fill", t4.url());
+
+
+        var svg5 = d3.select("#incidencePattern5")
+          .append("svg");
+        var t5 = textures.lines()
+                        .size(5)
+                        .strokeWidth(0.4)
+                        .stroke("white")
+        svg5.call(t5);
+        svg5.append("rect")
+        	.attr("width", 36)
+        	.attr("height", 36)
+        	.style("fill", t5.url());
+
+
+        
+        var plot_disease = function(data,disease_data,svg,disease_name,year){
+            var maxval_disease = d3.max(disease_data, d => +d[disease_name]);
+
+            svg.selectAll("*").remove();
+
+            var scale_val_disease = function (val) {
+                if (val != 0) {
+                    return (val) / (maxval_disease)
+                } 
+                else {
+                    return null
+                }
+            }
+
+            var tById = {};
+            countries_names.forEach(function (d) { //function defining the texture/pattern of each country depending on the disease and year selected
+
+                var found_row = disease_data.filter(e => e["country"] == d && e["year"] == year)
+
+                if (found_row[0] && found_row[0][disease_name]!=null) {
+
+                    	tById[d] = textures //texture representing incidence rate
+                        .circles()
+                        .size(9 / (0.05+scale_val_disease(+found_row[0][disease_name])))
+                        .radius(0.25)                    
+                        .strokeWidth(2)
+                        .stroke("red")
+                        .complement();
+                } 
+                else {
+                    tById[d] = textures //texture for countries with no available disease data
+                        .lines()
+                        .size(5)
+                        .strokeWidth(0.4)
+                        .stroke("white")
+                }
+
+            });
+
+
+            const texture = textures
+                .circles()
+
+            countries_names.forEach(function (d) {
+                svg.call(tById[d]);
+            });
+
+            
+            svg.append("g")
+                .selectAll('.country')
+                .data(topojson.feature(data, data.objects.europe).features) // Bind TopoJSON data elements
+                .enter().append("path")
+                .attr('class', 'country')
+                .attr('d', path)
+                .on('click', drawchart)
+                .on("mousemove", function(d){
+                	showTooltip(d.properties.name,year,disease_data,disease_name)
+                })
+          		.on("mouseout",  function(d,i) {
+              		tooltip.classed("hidden", true);
+           		})
+                .style("fill", texture.url())
+
+
+                .style("fill", function(d) {
+                    return tById[d.properties.name].url() // get rate value for property matching data ID
+                    //pass rate value to color function, return color based on domain and range
+                })
+
+                .style("stroke", "white");
+
+
+            d3.select("#incidenceText2").text((maxval_disease/3).toFixed(2))
+			d3.select("#incidenceText3").text((2*maxval_disease/3).toFixed(2))
+            d3.select("#incidenceText4").text(maxval_disease.toFixed(2))
+        }
+
+        function showTooltip(c_name,d_year,disease_data,disease_name) {
+        	var found_row = disease_data.filter(e => e["country"] == c_name && e["year"] == d_year)
+        	var label = c_name+": no data";
+        	if (found_row[0] && found_row[0][disease_name]!=null) {
+        		label = c_name+": "+parseFloat(found_row[0][disease_name]).toFixed(2);
+        	}
+          	var mouse = d3.mouse(svg.node())
+            	.map( function(d) { return parseInt(d); } );
+          	tooltip.classed("hidden", false)
+            	.attr("style", "left:"+(mouse[0]+offsetL)+"px;top:"+(mouse[1]+offsetT)+"px")
+            	.html(label);
+        }
+
+        function ready(error, data, disease_data,temp_measurements,avg_temps) {
+            if (error) throw error;
+
+            d3.select('#loadingContainer').style("display", "none") 
+
+            countries_data_loaded = data;
+
+            disease_data_loaded = disease_data;
+            temp_data_loaded = temp_measurements;
+            avg_temp_data_loaded = avg_temps;
+
+            var global_min = 1000;
+            var global_max = -2000;
+
+            syear.forEach(function (y) {
+                minval = d3.min(temp_measurements, d => +d[+y]);
+                maxval = d3.max(temp_data_loaded, d => +d[+y]);
+                global_max = Math.max(maxval, global_max);
+                global_min = Math.min(minval, global_min);
+            });
+
+            temp_max = global_max;
+            temp_min = global_min;
+
+            plot_disease(data, disease_data, svg, "Dengue", 2008);
+           
+            plot_heat(canvas,temp_measurements,projection,2008);
+
+        }
+
+        //text before country is selected for plotting
+    	var canvas2 = document.getElementById('myChart');
+		var context = canvas2.getContext('2d');
+		// context.font = "12pt Helvetica";
+		// context.fillText("Click on a country to plot the details", 200, 40);
+
+
+		//draw plot when a country is selected
+        function drawchart(d) {
+            d3.select('#selectContainer').style("display", "none") 
+        	document.getElementById('myChart').remove(); 
+  			d3.select('#plotContainer').append('canvas').attr('id', 'myChart').attr('width','600px').attr('height','400px');
+	        var ctx = document.getElementById('myChart');
+	        if(dhtChart){
+	        	dhtChart.destroy();
+	        } 
+	        Chart.defaults.global.defaultFontColor = 'black';
+	        Chart.defaults.global.defaultFontFamily = 'Helvetica';
+			var dhtChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [2008,2009,2010,2011,2012,2013,2014,2015,2016,2017],
+                    datasets: [
+                        {
+                            label: "Temperature",
+                            borderColor: "rgba(247, 161, 1, 1)",
+                            fillColor: "rgba(247, 161, 1, 1)",
+                            strokeColor: "rgba(247, 161, 1, 1)",
+                            backgroundColor: 'transparent',
+                            // pointColor: "rgba(225, 225, 0, 1)",
+                            // pointStrokeColor: "#fff",
+                            // pointHighlightFill: "#fff",
+                            // pointHighlightStroke: "rgba(220,220,220,1)",
+                            yAxisID: 'y-axis-1',
+                            data: Object.values(avg_temp_data_loaded.filter(e => e["country"] == d.properties.name)[0])
+                        },
+                        {
+                            label: "Dengue",
+                            borderColor: "midnightblue",
+                            fillColor: "midnightblue",
+                            strokeColor: "midnightblue",
+                            backgroundColor: 'transparent',
+                            // pointColor: "rgba(151,187,205,1)",
+                            // pointStrokeColor: "#fff",
+                            // pointHighlightFill: "#fff",
+                            // pointHighlightStroke: "rgba(151,187,205,1)",
+                            yAxisID: 'y-axis-2',
+                            data: disease_data_loaded.filter(e => e["country"] == d.properties.name).map(x => x.Dengue)
+                        },
+                        {
+                            label: "Malaria",
+                            borderColor: "rgba(14, 151, 45, 1)",
+                            fillColor: "rgba(14, 151, 45,1)",
+                            strokeColor: "rgba(14, 151, 45,1)",
+                            backgroundColor: 'transparent',
+                            // pointColor: "rgba(151,187,205,1)",
+                            // pointStrokeColor: "#fff",
+                            // pointHighlightFill: "#fff",
+                            // pointHighlightStroke: "rgba(151,187,205,1)",
+                            yAxisID: 'y-axis-2',
+                            data: disease_data_loaded.filter(e => e["country"] == d.properties.name).map(x => x.Malaria)
+                        },
+                        {
+                            label: "Tick-borne encephalitis",
+                            borderColor: "rgba(0, 167, 216, 1)",
+                            fillColor: "rgba(0, 167, 216, 1)",
+                            strokeColor: "rgba(0, 167, 216, 1)",
+                            backgroundColor: 'transparent',
+                            // pointColor: "rgba(151,187,205,1)",
+                            // pointStrokeColor: "#fff",
+                            // pointHighlightFill: "#fff",
+                            // pointHighlightStroke: "rgba(151,187,205,1)",
+                            yAxisID: 'y-axis-2',
+                            data: disease_data_loaded.filter(e => e["country"] == d.properties.name).map(x => x.Tick_enc)
+                        }
+                    ]
+                },
+                    options: {
+                    	title: {
+            	            display: true,
+            	            text: d.properties.name,
+            	            fontSize: 15,
+            	            fontStyle: "normal",
+
+            	        },
+                        scales: {
+                            yAxes: [{
+                            	scaleLabel: {
+                        	        display: true,
+                        	        labelString: 'Temperature (°C)'
+                        	    },
+                                id: 'y-axis-1',                             
+                                type: 'linear',
+                                position: 'left',
+                            }, {
+                            	scaleLabel: {
+                        	        display: true,
+                        	        labelString: 'Incidence Rate (N/100k)'
+                        	    },
+                                id: 'y-axis-2',                             
+                                type: 'linear',
+                                position: 'right',
+                            }]
+                        }   
+                    }
+            });
+
+        }
+
+        
+	</script>	
+</body>
+</html>

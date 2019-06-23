@@ -1,0 +1,337 @@
+/*stylesheet*/
+
+/* graphic elements */
+        /* The HTML <svg> element is a container for SVG graphics. */
+        #container svg,
+        /* The <canvas> element is only a container for graphics. You must use JavaScript to actually draw the graphics. */
+        #container canvas {
+            position: absolute;
+            top: 100px;
+            left: 30px;
+            height: 700px;
+        }
+    
+        canvas {
+            background-color: black;
+        }
+
+        #title {
+            position: absolute;
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            font-size: 20pt;
+            top: 30px;
+            left: 30px;
+        }
+
+
+        #loadingContainer {
+            position: absolute;
+            left: 320px;
+            top: 400px;            
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            font-size: 14pt;
+        }
+
+        .blinking{
+            animation:blinkingText 0.8s infinite;
+        }
+        @keyframes blinkingText{
+            0%{     color: white;    }
+            49%{    color: transparent; }
+            50%{    color: transparent; }
+            99%{    color: white;  }
+            100%{   color: white;    }
+        }
+
+
+        #legendContainer {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.5);
+            top: 120px;
+            right: 100px;
+            height: 700px;
+            border-radius: 5px;
+            padding: 20px;
+        }
+
+
+        #dropDown {
+            
+        }
+        .styled-select {
+            background: url(http://i62.tinypic.com/15xvbd5.png) no-repeat 96% 0;
+            height: 29px;
+            position: relative;
+            top: 20px;
+            overflow: hidden;
+            width: 200px;
+            background-color: midnightblue; 
+        }
+
+        .styled-select select {
+            background: transparent;
+            border: none;
+            font-size: 14px;
+            height: 29px;
+            padding: 5px; /* If you add too much padding here, the options won't show in IE */
+            width: 268px;
+            color: #fff;
+        }
+ 
+        .semi-square {
+            border-radius: 5px;
+        }
+
+
+        #sliderContainer {
+            text-align: center;
+            position: relative;
+            top: 120px;
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            font-size: 11pt;
+        }
+
+        .slider {
+            -webkit-appearance: none;  /* Override default CSS styles */
+            appearance: none;
+            width: 200px; /* Specified width*/
+            height: 10px; /* Specified height */
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background: midnightblue; /* Grey background */
+            outline: none; /* Remove outline */
+            -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+            transition: opacity .2s;
+
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default look */
+            appearance: none;
+            width: 20px; /* Set a specific slider handle width */
+            height: 20px; /* Slider handle height */
+            border-radius: 50%;
+            opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */ 
+            background: black; /* black background */
+            cursor: pointer; /* Cursor on hover */
+        }
+
+
+
+        #tempContainer {
+            position: relative;
+            top: 190px;
+
+        }
+
+        #tempTitle {
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            padding-bottom: 5px;
+            font-size: 11pt;
+            text-align-last: center;
+        }
+
+
+
+        #tempText {
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            padding-top: 5px;
+            font-size: 11pt;
+            text-align-last: justify;
+        }
+
+
+        #tempGradient {
+            
+            background: linear-gradient(to right, blue 0%, cyan 25%, lime 50%, yellow 75%, red 100%);
+            border-radius: 5px;
+            width: 200px;
+            height: 20px;
+        }
+
+
+        #incidenceTitle {
+            position: relative;
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            font-size: 11pt;
+            top: 270px;
+        }
+
+        #incidenceContainer1 {
+            position: relative;
+            top: 280px;
+            height: 36px;
+            margin: 4px;
+        }
+
+        #incidenceText1 {
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            padding-left: 10px;
+            font-size: 11pt;
+            vertical-align: middle;
+            float: left;
+            height: 36px;
+            line-height: 36px;
+        }
+
+        #incidencePattern1 {
+            width: 36px;
+            height: 36px;
+            background-color: midnightblue;
+            border-radius: 5px;
+            float: left;
+        }
+
+        #incidenceContainer2 {
+            position: relative;
+            top: 280px;
+            height: 36px;
+            margin: 4px;
+        }
+
+        #incidenceText2 {
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            padding-left: 10px;
+            font-size: 11pt;
+            vertical-align: middle;
+            float: left;
+            height: 36px;
+            line-height: 36px;          
+        }
+
+        #incidencePattern2{
+            width: 36px;
+            height: 36px;
+            background-color: midnightblue;
+            border-radius: 5px;
+            float: left;
+
+        }
+
+        #incidenceContainer3 {
+            position: relative;
+            top: 280px;
+            height: 36px;
+            margin: 4px;
+        }
+
+        #incidenceText3 {
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            padding-left: 10px;
+            font-size: 11pt;
+            vertical-align: middle;
+            float: left;
+            height: 36px;
+            line-height: 36px;          
+        }
+
+        #incidencePattern3{
+        
+            width: 36px;
+            height: 36px;;
+            background-color: midnightblue;
+            border-radius: 5px;
+            float: left;
+        }
+
+        #incidenceContainer4 {
+            position: relative;
+            top: 280px;
+            height: 36px;
+            margin: 4px;
+        }
+
+        #incidenceText4 {
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            padding-left: 10px;
+            font-size: 11pt;
+            vertical-align: middle;
+            float: left;
+            height: 36px;
+            line-height: 36px;          
+        }
+
+        #incidencePattern4{        
+            width: 36px;
+            height: 36px;
+            background-color: midnightblue;
+            border-radius: 5px;
+            float: left;
+
+        }
+
+        #incidenceContainer5 {
+            position: relative;
+            top: 280px;
+            height: 36px;
+            margin: 4px;
+        }
+
+        #incidenceText5 {
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            padding-left: 10px;
+            font-size: 11pt;
+            vertical-align: middle;
+            float: left;
+            height: 36px;
+            line-height: 36px;          
+        }
+
+        #incidencePattern5{
+            width: 36px;
+            height: 36px;
+            background-color: midnightblue;
+            float: right;
+            border-radius: 5px;
+            float: left;
+        }
+
+
+        .hidden {
+            display: none;
+        }
+
+        div.tooltip {
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            font-size: 11pt;
+            color: #222; 
+            background: #fff; 
+            border-radius: 3px; 
+            box-shadow: 0px 0px 2px 0px #a6a6a6; 
+            padding: .2em; 
+            text-shadow: #f5f5f5 0 1px 0;
+            opacity: 0.9; 
+            position: absolute;
+        }
+
+
+        #plotContainer {
+            position: absolute;
+            top:850px;
+            left: 50px;
+            background-color: white;
+        }
+
+        #plotContainer canvas{
+
+            background-color: white;
+            color: black; 
+        }
+
+
+        #text {
+            position: absolute;
+            width: 700px;
+            top: 1300px;
+            left: 30px;
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            font-size: 11pt;
+            margin-bottom: 30px;
+        }
+
+            #selectContainer {
+            position: absolute;
+            left: 250px;
+            top: 900px;            
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+            font-size: 13pt;
+        }
