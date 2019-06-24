@@ -104,12 +104,14 @@
 	</div>
 
 	<script>
-		// js D3 code
+		// define the dimensions of the canvas that d3 uses
         var width = 700, height = 700; center = [12, 72];
 
+        // define the years for the dropdown and set an initial value
         var inputValue = "2008";
         var syear = ["2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017"];
 
+        // define the global variables that will contain the loaded data
         var disease_data_loaded = null;
         var temp_data_loaded = null
         var avg_temp_data_loaded = null
@@ -117,51 +119,42 @@
         var temp_max = null;
         var temp_min = null;
 
+        // define the array of country names to be used
         countries_names = ["Aland","Albania","Andorra","Armenia","Austria","Azerbaijan","Belarus","Belgium","Bosnia and Herz.","Bulgaria","Croatia","Cyprus","Czech Rep.","Denmark","Estonia","Faeroe Is.","Finland","France","Georgia","Germany","Greece","Greenland","Guernsey","Hungary","Iceland","Ireland","Isle of Man","Italy","Jersey","Kazakhstan","Kosovo","Latvia","Liechtenstein","Lithuania","Luxembourg","Macedonia","Moldova","Monaco","Montenegro","N. Cyprus","Netherlands","Norway","Poland","Portugal","Romania","Russia","San Marino","Serbia","Slovakia","Slovenia","Spain","Sweden","Switzerland","Turkey","Turkmenistan","Ukraine","United Kingdom","Vatican"]
 
-        //Mercator projection
+        // use the Mercator projection to generate the map
         var projection = d3.geoMercator().scale(600).translate([width / 2, 0]).center(center);
 
-        var path = d3.geoPath()
-            .projection(projection);
+        // generate a d3 path that uses the projection
+        var path = d3.geoPath().projection(projection);
 
+        // select the main div that contains the canvas and svg map
         var div = d3.select('#container');
-        
         var canvasLayer = div.append('canvas').attr('id', 'heatmap').attr('width', width).attr('height', height);
-        // The getContext() method returns an object that provides methods and properties for drawing on the canvas. Node: Base class for all scene objects.
+
+        // the getContext() method returns an object that provides methods and properties for drawing on the canvas. 
         var canvas = canvasLayer.node(),
             context = canvas.getContext("2d");
 
+        // append the svg with the previously defined dimensions
         var svg = div.append('svg').attr('id', 'map').attr('width', width).attr('height', height);
 
-        // Queue up datasets using d3 Queue
-        // function getTempData() {
-        //     return 'http://localhost:5000/gettempdata';
-        // }
-        // function getAvgTempData() {
-        //     return 'http://localhost:5000/getavgtempdata';
-        // }
-        // function getDiseaseData() {
-        //     return 'http://localhost:5000/getdiseasedata';
-        // }
-        //Changes map if time slide is used; "this" will refer to the parent object in the body of the function; + use numerical value (if string)
+        // changes map if time slider is used; "this" will refer to the parent object in the body of the function; + use numerical value (if string)
         d3.select("#timeslide").on("input", function () {
             update(+this.value);
         });
 
+        // changes map with new disease rendering when disease dopdown is changed
         d3.select("#dropDown").on("change", function(){
             update_disease(d3.select("#dropDown").node().value);
         });
 
-        var tooltip = d3.select("#container")
-     		.append("div")
-    	 	.attr("class", "tooltip hidden");
+        // append a tooltip div and the offset from the mouse that will be used to display the country name
+        var tooltip = d3.select("#container").append("div").attr("class", "tooltip hidden");
+    	var offsetL = document.getElementById('container').offsetLeft+50;
+    	var offsetT = document.getElementById('container').offsetTop+50;
 
-    	 var offsetL = document.getElementById('container').offsetLeft+50;
-    	 var offsetT = document.getElementById('container').offsetTop+50;
-
-        // getElementById() returns an Element object representing the element whose id property matches the specified string
-        // Update map according to year selected
+        // update map according to year selected
         function update(value) {
             document.getElementById("range").innerHTML = syear[value];
             inputValue = syear[value];
@@ -169,13 +162,13 @@
             plot_disease(countries_data_loaded,disease_data_loaded,svg,d3.select("#dropDown").node().value,syear[value]);
         }
 
-        // Update map according to disease selected
+        // update map according to disease selected
         function update_disease(disease_value) {
             plot_heat(canvas, temp_data_loaded, projection, +inputValue);
             plot_disease(countries_data_loaded, disease_data_loaded, svg, disease_value, +inputValue);
         }
 
-        // Ready Function, runs when data is loaded
+        // load data: ready function runs when all data done loading
         d3.queue()
             .defer(d3.json, "static/data/eu.topojson") // Load EU Countries
             .defer(d3.json, "/getdiseasedata") // Load disease data
@@ -183,11 +176,13 @@
             .defer(d3.json, "/getavgtempdata") // Load average temperature data
             .await(ready); // Run 'ready' when all JSONs are loaded
 
-
-
-        //plot heat map
+        //plot heat map for temperature distribution
         var plot_heat = function (can,t_meas,proj,year) {
+
+            // use simpleheat library to plot the heat map
             var heat = simpleheat(can);
+
+            // define function for scaling the heat map for max and min temperatures
             var scale_val = function (val) {
                 if (val != 0) {
                     return (val - temp_min) / (temp_max - temp_min)
@@ -196,114 +191,93 @@
                     return null
                 }
             }
+
             // arrow function (=>) expression is an alternative to a regular function expression
             // The map() method creates a new array with the results of calling a provided function on every element in the calling array.
             // The data() method attaches data to, or gets data from, selected elements.
             // convert from lon/lat to x/y in canvas; temperature in input year -> heat map
             heat.data(t_meas.map(d => { return [proj([d.lon, d.lat])[0], proj([d.lon, d.lat])[1], scale_val(+d[year])] }));
-            // set point radius and blur radius (25 and 15 by default)
+            
+            // set point radius and blur radius for heat map (25 and 15 by default)
             heat.radius(5, 15);
-            // set maximum for domain
-            heat.max(1.0);
-            heat.resize();
-            // draw into canvas, with minimum opacity threshold
-            heat.draw(0.10);
-        }
 
-        var plot_heat_legend = function (can,t_meas,proj,year) {
-            var heat = simpleheat(can);
-            var scale_val = function (val) {
-                if (val != 0) {
-                    return (val - temp_min) / (temp_max - temp_min)
-                }
-                else {
-                    return null
-                }
-            }
-            // arrow function (=>) expression is an alternative to a regular function expression
-            // The map() method creates a new array with the results of calling a provided function on every element in the calling array.
-            // The data() method attaches data to, or gets data from, selected elements.
-            // convert from lon/lat to x/y in canvas; temperature in input year -> heat map
-            heat.data([[0,0,0],[250,0,1.0]]);
-            // set point radius and blur radius (25 and 15 by default)
-            heat.radius(5, 15);
             // set maximum for domain
             heat.max(1.0);
             heat.resize();
+
             // draw into canvas, with minimum opacity threshold
             heat.draw(0.10);
         }
 
 
-		//pattern (texture) of the legends of the incidence rate
-        var svg1 = d3.select("#incidencePattern1")
-          .append("svg");
+        // draw the legend for the disease incidence rates by creating 5 boxes with corresponding textures
+        function plot_disease_legend(){
+    		
+            // append svgs to all 5 div boxes
+            var svg1 = d3.select("#incidencePattern1").append("svg");
+            var svg2 = d3.select("#incidencePattern2").append("svg");
+            var svg3 = d3.select("#incidencePattern3").append("svg");
+            var svg4 = d3.select("#incidencePattern4").append("svg");
+            var svg5 = d3.select("#incidencePattern5").append("svg");
 
+            // for every box that needs a texture, add the circle texture with increasing radii
+            var t2 = textures.circles()
+                .size(27)
+                .radius(0.25)                    
+                .strokeWidth(2)
+                .stroke("red")
+                .complement();
+            svg2.call(t2);
+            svg2.append("rect")
+            	.attr("width", 36)
+            	.attr("height", 36)
+            	.style("fill", t2.url());
 
-        var svg2 = d3.select("#incidencePattern2")
-          .append("svg");
-        var t2 = textures.circles()
-                        .size(27)
-                        .radius(0.25)                    
-                        .strokeWidth(2)
-                        .stroke("red")
-                        .complement();
-        svg2.call(t2);
-        svg2.append("rect")
-        	.attr("width", 36)
-        	.attr("height", 36)
-        	.style("fill", t2.url());
+            var t3 = textures.circles()
+                .size(13)
+                .radius(0.25)                    
+                .strokeWidth(2)
+                .stroke("red")
+                .complement();
+            svg3.call(t3);
+            svg3.append("rect")
+            	.attr("width", 36)
+            	.attr("height", 36)
+            	.style("fill", t3.url());
 
+            var t4 = textures.circles()
+                .size(8)
+                .radius(0.25)                    
+                .strokeWidth(2)
+                .stroke("red")
+                .complement();
+            svg4.call(t4);
+            svg4.append("rect")
+            	.attr("width", 36)
+            	.attr("height", 36)
+            	.style("fill", t4.url());
 
-        var svg3 = d3.select("#incidencePattern3")
-          .append("svg");
-        var t3 = textures.circles()
-                        .size(13)
-                        .radius(0.25)                    
-                        .strokeWidth(2)
-                        .stroke("red")
-                        .complement();
-        svg3.call(t3);
-        svg3.append("rect")
-        	.attr("width", 36)
-        	.attr("height", 36)
-        	.style("fill", t3.url());
+            var t5 = textures.lines()
+                .size(5)
+                .strokeWidth(0.4)
+                .stroke("white")
+            svg5.call(t5);
+            svg5.append("rect")
+            	.attr("width", 36)
+            	.attr("height", 36)
+            	.style("fill", t5.url());
+        }
 
-
-        var svg4 = d3.select("#incidencePattern4")
-          .append("svg");
-        var t4 = textures.circles()
-                        .size(8)
-                        .radius(0.25)                    
-                        .strokeWidth(2)
-                        .stroke("red")
-                        .complement();
-        svg4.call(t4);
-        svg4.append("rect")
-        	.attr("width", 36)
-        	.attr("height", 36)
-        	.style("fill", t4.url());
-
-
-        var svg5 = d3.select("#incidencePattern5")
-          .append("svg");
-        var t5 = textures.lines()
-                        .size(5)
-                        .strokeWidth(0.4)
-                        .stroke("white")
-        svg5.call(t5);
-        svg5.append("rect")
-        	.attr("width", 36)
-        	.attr("height", 36)
-        	.style("fill", t5.url());
-
-
-        
+        // overlay the disease textures for every country
         var plot_disease = function(data,disease_data,svg,disease_name,year){
+
+            //find the maximum occurance from the diseases
             var maxval_disease = d3.max(disease_data, d => +d[disease_name]);
 
+            // remove all previous textures
             svg.selectAll("*").remove();
 
+            //scale the max disease incidence rate for the texture radii
             var scale_val_disease = function (val) {
                 if (val != 0) {
                     return (val) / (maxval_disease)
@@ -313,11 +287,16 @@
                 }
             }
 
+            // define an empty object to write the right textures into for every country
             var tById = {};
-            countries_names.forEach(function (d) { //function defining the texture/pattern of each country depending on the disease and year selected
 
+            // function defining the texture/pattern of each country depending on the disease and year selected
+            countries_names.forEach(function (d) { 
+
+                // find the right data for every country and year
                 var found_row = disease_data.filter(e => e["country"] == d && e["year"] == year)
 
+                // then add a texture pattern for  that country
                 if (found_row[0] && found_row[0][disease_name]!=null) {
 
                     	tById[d] = textures //texture representing incidence rate
@@ -328,8 +307,9 @@
                         .stroke("red")
                         .complement();
                 } 
+                // texture for countries with no available disease data
                 else {
-                    tById[d] = textures //texture for countries with no available disease data
+                    tById[d] = textures 
                         .lines()
                         .size(5)
                         .strokeWidth(0.4)
@@ -338,105 +318,129 @@
 
             });
 
-
+            // default textures will be circles
             const texture = textures
                 .circles()
 
+            // call the country specific textures to the svg
             countries_names.forEach(function (d) {
                 svg.call(tById[d]);
             });
 
-            
+            // draw all countries
             svg.append("g")
                 .selectAll('.country')
+                //draw the country map from the imported topojson file
                 .data(topojson.feature(data, data.objects.europe).features) // Bind TopoJSON data elements
                 .enter().append("path")
                 .attr('class', 'country')
                 .attr('d', path)
+                // draw the specific plot when clicking on a country
                 .on('click', drawchart)
+                //show the tooltip when hovering
                 .on("mousemove", function(d){
                 	showTooltip(d.properties.name,year,disease_data,disease_name)
                 })
           		.on("mouseout",  function(d,i) {
               		tooltip.classed("hidden", true);
            		})
+                // append the country specific textures to the svg
                 .style("fill", texture.url())
-
-
                 .style("fill", function(d) {
                     return tById[d.properties.name].url() // get rate value for property matching data ID
                     //pass rate value to color function, return color based on domain and range
                 })
-
                 .style("stroke", "white");
 
-
+            // add the legend text to the disease legend
             d3.select("#incidenceText2").text((maxval_disease/3).toFixed(2))
 			d3.select("#incidenceText3").text((2*maxval_disease/3).toFixed(2))
             d3.select("#incidenceText4").text(maxval_disease.toFixed(2))
         }
 
+        // display the tooltip with the country name and the disease incident rate
         function showTooltip(c_name,d_year,disease_data,disease_name) {
+            // find the right data for the specified country and year
         	var found_row = disease_data.filter(e => e["country"] == c_name && e["year"] == d_year)
-        	var label = c_name+": no data";
+        	
+            // when no data available just say that
+            var label = c_name+": no data";
+
+            // otherwise print the incidence rate next to the country name
         	if (found_row[0] && found_row[0][disease_name]!=null) {
         		label = c_name+": "+parseFloat(found_row[0][disease_name]).toFixed(2);
         	}
+
+            // get the mouse location
           	var mouse = d3.mouse(svg.node())
             	.map( function(d) { return parseInt(d); } );
+
+            // show the tooltip at the offset mouse location
           	tooltip.classed("hidden", false)
             	.attr("style", "left:"+(mouse[0]+offsetL)+"px;top:"+(mouse[1]+offsetT)+"px")
             	.html(label);
         }
 
+        //function is called when all data is loaded
         function ready(error, data, disease_data,temp_measurements,avg_temps) {
             if (error) throw error;
 
+            // hide the container that displays the "loading.." text
             d3.select('#loadingContainer').style("display", "none") 
 
+            // write the loaded data to the global variables so that it is available in the other functions as well
             countries_data_loaded = data;
-
             disease_data_loaded = disease_data;
             temp_data_loaded = temp_measurements;
             avg_temp_data_loaded = avg_temps;
 
+            // determine the min and max temperature values and write them to the globally defines variables so that they are available in the other functions as well
             var global_min = 1000;
             var global_max = -2000;
-
             syear.forEach(function (y) {
                 minval = d3.min(temp_measurements, d => +d[+y]);
                 maxval = d3.max(temp_data_loaded, d => +d[+y]);
                 global_max = Math.max(maxval, global_max);
                 global_min = Math.min(minval, global_min);
             });
-
             temp_max = global_max;
             temp_min = global_min;
 
+            // plot the map, legends and heat map
             plot_disease(data, disease_data, svg, "Dengue", 2008);
+
+            plot_disease_legend();
            
             plot_heat(canvas,temp_measurements,projection,2008);
 
         }
 
-        //text before country is selected for plotting
-    	var canvas2 = document.getElementById('myChart');
-		var context = canvas2.getContext('2d');
-		// context.font = "12pt Helvetica";
-		// context.fillText("Click on a country to plot the details", 200, 40);
 
-
-		//draw plot when a country is selected
+		// draw disease/temperature vs time plot when a country is selected
         function drawchart(d) {
+
+            //hide the container that shows the text to select a country
             d3.select('#selectContainer').style("display", "none") 
-        	document.getElementById('myChart').remove(); 
+
+            // redraw the chart every time
+        	document.getElementById('myChart').remove();
+
+            // append a new chart with the right dimensions
   			d3.select('#plotContainer').append('canvas').attr('id', 'myChart').attr('width','600px').attr('height','400px');
+
+
 	        var ctx = document.getElementById('myChart');
+
+            //destroy the chart if it still exists
 	        if(dhtChart){
 	        	dhtChart.destroy();
 	        } 
+
+            // define the font style
 	        Chart.defaults.global.defaultFontColor = 'black';
 	        Chart.defaults.global.defaultFontFamily = 'Helvetica';
+
+            // create the chart with the years as x axis labels and the specific average temperatures and all three diseases
 			var dhtChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -448,10 +452,6 @@
                             fillColor: "rgba(247, 161, 1, 1)",
                             strokeColor: "rgba(247, 161, 1, 1)",
                             backgroundColor: 'transparent',
-                            // pointColor: "rgba(225, 225, 0, 1)",
-                            // pointStrokeColor: "#fff",
-                            // pointHighlightFill: "#fff",
-                            // pointHighlightStroke: "rgba(220,220,220,1)",
                             yAxisID: 'y-axis-1',
                             data: Object.values(avg_temp_data_loaded.filter(e => e["country"] == d.properties.name)[0])
                         },
@@ -461,10 +461,6 @@
                             fillColor: "midnightblue",
                             strokeColor: "midnightblue",
                             backgroundColor: 'transparent',
-                            // pointColor: "rgba(151,187,205,1)",
-                            // pointStrokeColor: "#fff",
-                            // pointHighlightFill: "#fff",
-                            // pointHighlightStroke: "rgba(151,187,205,1)",
                             yAxisID: 'y-axis-2',
                             data: disease_data_loaded.filter(e => e["country"] == d.properties.name).map(x => x.Dengue)
                         },
@@ -474,10 +470,6 @@
                             fillColor: "rgba(14, 151, 45,1)",
                             strokeColor: "rgba(14, 151, 45,1)",
                             backgroundColor: 'transparent',
-                            // pointColor: "rgba(151,187,205,1)",
-                            // pointStrokeColor: "#fff",
-                            // pointHighlightFill: "#fff",
-                            // pointHighlightStroke: "rgba(151,187,205,1)",
                             yAxisID: 'y-axis-2',
                             data: disease_data_loaded.filter(e => e["country"] == d.properties.name).map(x => x.Malaria)
                         },
@@ -487,15 +479,12 @@
                             fillColor: "rgba(0, 167, 216, 1)",
                             strokeColor: "rgba(0, 167, 216, 1)",
                             backgroundColor: 'transparent',
-                            // pointColor: "rgba(151,187,205,1)",
-                            // pointStrokeColor: "#fff",
-                            // pointHighlightFill: "#fff",
-                            // pointHighlightStroke: "rgba(151,187,205,1)",
                             yAxisID: 'y-axis-2',
                             data: disease_data_loaded.filter(e => e["country"] == d.properties.name).map(x => x.Tick_enc)
                         }
                     ]
                 },
+                    //show two y-axes for temperature and incidence rate
                     options: {
                     	title: {
             	            display: true,
